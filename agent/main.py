@@ -10,8 +10,14 @@ from fastapi.responses import StreamingResponse  # For streaming real-time respo
 import uuid  
 from typing import Any  
 import os  
+import sys
 import uvicorn  
 import asyncio  
+
+# Ensure agent directory is in sys.path for direct or module execution
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+if _current_dir not in sys.path:
+    sys.path.insert(0, _current_dir)
 
 # AG UI core components for agent communication and event handling
 from ag_ui.core import (
@@ -31,17 +37,43 @@ from ag_ui.core import (
 from ag_ui.encoder import EventEncoder  # Encoder for converting events to streamable format
 
 # Import our custom stock analysis workflow
-from stock_analysis import StockAnalysisFlow
+try:
+    from stock_analysis import StockAnalysisFlow
+except ImportError:
+    from agent.stock_analysis import StockAnalysisFlow
 
 # CopilotKit state management
 from copilotkit import CopilotKitState
+from fastapi.middleware.cors import CORSMiddleware
+
+# Import Portfolio Analytics router
+try:
+    from agent.api.routes import router as portfolio_router
+except ImportError:
+    from api.routes import router as portfolio_router
 
 # ===============================================================================
 # APPLICATION SETUP
 # ===============================================================================
 
 # Initialize FastAPI application instance
-app = FastAPI()
+app = FastAPI(
+    title="Stock Portfolio Intelligence & Risk Analytics API",
+    description="Deterministic portfolio analytics, risk metrics, and benchmark reporting engine.",
+    version="1.0.0",
+)
+
+# Configure CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Mount deterministic Portfolio Analytics router
+app.include_router(portfolio_router)
 
 
 # ===============================================================================
