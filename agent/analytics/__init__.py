@@ -14,6 +14,14 @@ from agent.analytics.portfolio import (
     calculate_portfolio_value_series,
     compute_portfolio_analytics,
 )
+from agent.analytics.portfolio_intelligence import (
+    calculate_asset_allocation,
+    calculate_concentration_metrics,
+    calculate_diversification_metrics,
+    calculate_return_contributions,
+    calculate_sector_exposure,
+    compute_portfolio_intelligence,
+)
 from agent.analytics.returns import (
     calculate_annualized_return,
     calculate_cumulative_returns,
@@ -37,10 +45,16 @@ from agent.analytics.tail_risk import (
 )
 from agent.analytics.types import (
     BenchmarkMetrics,
+    ConcentrationMetrics,
+    DiversificationMetrics,
+    HoldingAllocation,
     PortfolioAnalyticsSummary,
+    PortfolioIntelligenceSummary,
     PortfolioSnapshot,
+    ReturnContribution,
     ReturnMetrics,
     RiskMetrics,
+    SectorExposure,
     TailRiskMetrics,
 )
 
@@ -72,9 +86,16 @@ __all__ = [
     "calculate_historical_var",
     "calculate_historical_cvar",
     "compute_tail_risk_metrics",
-    # Portfolio
+    # Portfolio Valuation
     "calculate_portfolio_value_series",
     "compute_portfolio_analytics",
+    # Portfolio Intelligence (Step 7)
+    "calculate_asset_allocation",
+    "calculate_sector_exposure",
+    "calculate_concentration_metrics",
+    "calculate_return_contributions",
+    "calculate_diversification_metrics",
+    "compute_portfolio_intelligence",
     # Types
     "ReturnMetrics",
     "RiskMetrics",
@@ -82,4 +103,10 @@ __all__ = [
     "PortfolioAnalyticsSummary",
     "BenchmarkMetrics",
     "TailRiskMetrics",
+    "HoldingAllocation",
+    "SectorExposure",
+    "ConcentrationMetrics",
+    "ReturnContribution",
+    "DiversificationMetrics",
+    "PortfolioIntelligenceSummary",
 ]

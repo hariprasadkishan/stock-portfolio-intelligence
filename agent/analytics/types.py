@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 import pandas as pd
 
 
@@ -143,4 +143,97 @@ class TailRiskMetrics:
             "var_custom": self.var_custom,
             "cvar_custom": self.cvar_custom,
             "total_observations": self.total_observations,
+        }
+
+
+@dataclass(frozen=True)
+class HoldingAllocation:
+    """Individual holding allocation details."""
+
+    ticker: str
+    shares: float
+    current_price: float
+    market_value: float
+    portfolio_weight: float
+    sector: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class SectorExposure:
+    """Aggregated portfolio exposure by sector."""
+
+    sector: str
+    market_value: float
+    portfolio_weight: float
+
+
+@dataclass(frozen=True)
+class ConcentrationMetrics:
+    """Portfolio concentration metrics including HHI and top holdings."""
+
+    hhi: float
+    largest_holding_ticker: Optional[str]
+    largest_holding_weight: float
+    top_3_weight: float
+    top_5_weight: float
+    total_holdings_count: int
+
+    def to_dict(self) -> dict:
+        return {
+            "hhi": self.hhi,
+            "largest_holding_ticker": self.largest_holding_ticker,
+            "largest_holding_weight": self.largest_holding_weight,
+            "top_3_weight": self.top_3_weight,
+            "top_5_weight": self.top_5_weight,
+            "total_holdings_count": self.total_holdings_count,
+        }
+
+
+@dataclass(frozen=True)
+class ReturnContribution:
+    """Individual asset contribution to total portfolio return."""
+
+    ticker: str
+    portfolio_weight: float
+    asset_return: float
+    contribution: float
+    contribution_pct: Optional[float]
+
+
+@dataclass(frozen=True)
+class DiversificationMetrics:
+    """Asset-level return correlation and diversification metrics."""
+
+    correlation_matrix: pd.DataFrame
+    average_pairwise_correlation: Optional[float]
+    highest_pairwise_correlation: Optional[float]
+    highest_correlation_pair: Optional[Tuple[str, str]]
+    lowest_pairwise_correlation: Optional[float]
+    lowest_correlation_pair: Optional[Tuple[str, str]]
+    total_pairs_count: int
+
+
+@dataclass
+class PortfolioIntelligenceSummary:
+    """Comprehensive portfolio intelligence summary combining allocation, exposure, concentration, and diversification."""
+
+    total_market_value: float
+    allocations: List[HoldingAllocation]
+    sector_exposures: List[SectorExposure]
+    concentration: ConcentrationMetrics
+    return_contributions: List[ReturnContribution]
+    diversification: DiversificationMetrics
+    portfolio_return: Optional[float]
+    allocation_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+    sector_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+    contribution_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+
+    def to_dict(self) -> dict:
+        return {
+            "total_market_value": self.total_market_value,
+            "portfolio_return": self.portfolio_return,
+            "concentration": self.concentration.to_dict(),
+            "allocations_count": len(self.allocations),
+            "sectors_count": len(self.sector_exposures),
+            "average_pairwise_correlation": self.diversification.average_pairwise_correlation,
         }
