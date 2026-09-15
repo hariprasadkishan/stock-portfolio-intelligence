@@ -35,6 +35,55 @@ load_dotenv()
 
 
 # ===============================================================================
+# LLM CLIENT & MODEL HELPERS
+# ===============================================================================
+
+def get_llm_client() -> OpenAI:
+    """
+    Returns an OpenAI or OpenAI-compatible client based on the AI_PROVIDER environment variable.
+    
+    Supported providers:
+    - 'groq': Uses Groq's OpenAI-compatible endpoint with GROQ_API_KEY.
+    - 'openai': Uses official OpenAI endpoint with OPENAI_API_KEY.
+    """
+    provider = os.getenv("AI_PROVIDER", "openai").strip().lower()
+
+    if provider == "groq":
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise ValueError("GROQ_API_KEY environment variable is not set.")
+        return OpenAI(
+            base_url="https://api.groq.com/openai/v1",
+            api_key=api_key,
+        )
+    elif provider == "openai":
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable is not set.")
+        return OpenAI(api_key=api_key)
+    else:
+        raise ValueError(
+            f"Unsupported AI_PROVIDER '{provider}'. Supported providers are 'openai' and 'groq'."
+        )
+
+
+def get_llm_model() -> str:
+    """
+    Returns the configured model name based on AI_PROVIDER with sensible defaults:
+    - 'groq': GROQ_MODEL or 'llama-3.3-70b-versatile'
+    - 'openai': OPENAI_MODEL or 'gpt-4o-mini'
+    """
+    provider = os.getenv("AI_PROVIDER", "openai").strip().lower()
+
+    if provider == "groq":
+        return os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile").strip()
+    elif provider == "openai":
+        return os.getenv("OPENAI_MODEL", "gpt-4o-mini").strip()
+    else:
+        return os.getenv("OPENAI_MODEL", "gpt-4o-mini").strip()
+
+
+# ===============================================================================
 # TOOL DEFINITIONS
 # ===============================================================================
 
@@ -224,9 +273,9 @@ class StockAnalysisFlow(Flow):
             await asyncio.sleep(0)  # Allow other tasks to run
             
             # Step 2.3: Call OpenAI to analyze user input and extract investment data
-            model = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            model = get_llm_client()
             response = model.chat.completions.create(
-                model="gpt-4o-mini",
+                model=get_llm_model(),
                 messages= self.state['state']['messages'],
                 tools= [extract_relevant_data_from_user_prompt]  # Function calling tool
             )
@@ -975,9 +1024,9 @@ class StockAnalysisFlow(Flow):
         current_tickers = self.be_arguments['ticker_symbols']
         
         # Step 5.5: Call OpenAI to generate bull/bear insights
-        model = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        model = get_llm_client()
         response = model.chat.completions.create(
-            model="gpt-4o-mini",
+            model=get_llm_model(),
             messages=[
                 {"role": "system", "content": insights_prompt},  # Custom insights prompt
                 {"role": "user", "content": json.dumps(current_tickers)},  # Send ticker list
