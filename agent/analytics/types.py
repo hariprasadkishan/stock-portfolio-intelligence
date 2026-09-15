@@ -92,3 +92,55 @@ class PortfolioAnalyticsSummary:
             "total_trading_days": self.total_trading_days,
             "risk_free_rate": self.risk_free_rate,
         }
+
+
+@dataclass(frozen=True)
+class BenchmarkMetrics:
+    """Calculated benchmark comparison metrics for a portfolio."""
+
+    correlation: Optional[float]
+    covariance: Optional[float]
+    beta: Optional[float]
+    alpha: Optional[float]
+    tracking_error: Optional[float]
+    information_ratio: Optional[float]
+    aligned_observations: int
+    risk_free_rate: float
+
+    def to_dict(self) -> dict:
+        return {
+            "correlation": self.correlation,
+            "covariance": self.covariance,
+            "beta": self.beta,
+            "alpha": self.alpha,
+            "tracking_error": self.tracking_error,
+            "information_ratio": self.information_ratio,
+            "aligned_observations": self.aligned_observations,
+            "risk_free_rate": self.risk_free_rate,
+        }
+
+
+@dataclass(frozen=True)
+class TailRiskMetrics:
+    """Historical Value at Risk (VaR) and Conditional VaR (Expected Shortfall).
+
+    Sign convention:
+    Positive numbers denote loss magnitudes (e.g. 0.025 denotes a 2.5% loss).
+    """
+
+    var_95: Optional[float]
+    cvar_95: Optional[float]
+    confidence_level: float
+    var_custom: Optional[float]
+    cvar_custom: Optional[float]
+    total_observations: int
+
+    def to_dict(self) -> dict:
+        return {
+            "var_95": self.var_95,
+            "cvar_95": self.cvar_95,
+            "confidence_level": self.confidence_level,
+            "var_custom": self.var_custom,
+            "cvar_custom": self.cvar_custom,
+            "total_observations": self.total_observations,
+        }
