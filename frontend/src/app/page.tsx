@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { PromptPanel } from "./components/prompt-panel"
 import { GenerativeCanvas } from "./components/generative-canvas"
 import { ComponentTree } from "./components/component-tree"
@@ -286,14 +287,15 @@ export default function OpenStocksCanvas() {
           />
         </div>
 
-        {/* <div className="absolute top-4 right-4 z-20">
-          <button
-            onClick={toggleComponentTree}
-            className="px-3 py-1 text-xs font-semibold text-[#575758] bg-white border border-[#D8D8E5] rounded-md hover:bg-[#F0F0F4] transition-colors"
+        <div className="absolute top-4 right-4 z-20">
+          <Link
+            href="/portfolio/dashboard"
+            id="nav-to-dashboard"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm border border-slate-700 transition-colors"
           >
-            {showComponentTree ? "Hide Tree" : "Show Tree"}
-          </button>
-        </div> */}
+            Analytics Dashboard →
+          </Link>
+        </div>
 
         <div className="pt-20 h-full">
           <GenerativeCanvas setSelectedStock={setSelectedStock} portfolioState={currentState} sandBoxPortfolio={sandBoxPortfolio} setSandBoxPortfolio={setSandBoxPortfolio} />

@@ -289,3 +289,33 @@ class TestPortfolioEndpoints:
         resp_dash = client.get(f"/api/portfolio/{EMPTY_P_ID}/dashboard")
         assert resp_dash.status_code == 200
         assert resp_dash.json()["allocation"]["allocations"] == []
+
+    def test_list_portfolios_endpoint(self):
+        """GET /api/portfolio returns list of all available portfolios."""
+        resp = client.get("/api/portfolio")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert isinstance(data, list)
+        assert len(data) >= 2
+        p_ids = {p["id"] for p in data}
+        assert str(TEST_P_ID) in p_ids
+        assert str(EMPTY_P_ID) in p_ids
+
+    def test_concentration_endpoint_and_allocation_field(self):
+        """GET /api/portfolio/{id}/concentration and allocation.concentration return valid metrics."""
+        # 1. Dedicated concentration endpoint
+        resp = client.get(f"/api/portfolio/{TEST_P_ID}/concentration")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["largest_holding_ticker"] == "API_MSFT"
+        assert data["largest_holding_weight"] > 0.5
+        assert data["hhi"] > 0.0
+        assert data["top_3_weight"] == pytest.approx(1.0, rel=1e-4)
+
+        # 2. Inside allocation response
+        resp_alloc = client.get(f"/api/portfolio/{TEST_P_ID}/allocation")
+        assert resp_alloc.status_code == 200
+        alloc_data = resp_alloc.json()
+        assert "concentration" in alloc_data
+        assert alloc_data["concentration"]["largest_holding_ticker"] == "API_MSFT"
+

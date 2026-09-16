@@ -132,3 +132,9 @@ def get_latest_risk_metrics(
         .order_by(PortfolioRiskMetric.as_of_date.desc(), PortfolioRiskMetric.calculated_at.desc())
         .first()
     )
+
+
+def get_all_portfolios(session: Session) -> List[Portfolio]:
+    """Retrieve all portfolios ordered by created_at descending."""
+    return session.query(Portfolio).order_by(Portfolio.created_at.desc()).all()
+

@@ -47,6 +47,7 @@ from agent.analytics.tail_risk import (
     calculate_historical_var,
 )
 from agent.api.repository import (
+    get_all_portfolios,
     get_assets_by_tickers,
     get_historical_market_prices,
     get_latest_market_prices,
@@ -56,6 +57,7 @@ from agent.api.repository import (
 )
 from agent.api.schemas import (
     AllocationItem,
+    ConcentrationItem,
     ContributionItem,
     DashboardSummaryResponse,
     PerformanceObservation,
@@ -63,6 +65,7 @@ from agent.api.schemas import (
     PortfolioBenchmarkResponse,
     PortfolioContributionsResponse,
     PortfolioCorrelationResponse,
+    PortfolioListItem,
     PortfolioOverviewResponse,
     PortfolioPerformanceResponse,
     PortfolioRiskResponse,
@@ -175,6 +178,30 @@ def _get_or_compute_valuation_series(
 # ==============================================================================
 # ENDPOINTS
 # ==============================================================================
+
+@router.get(
+    "",
+    response_model=List[PortfolioListItem],
+    summary="List Portfolios",
+    description="Returns available portfolios for switcher dropdown.",
+)
+@router.get(
+    "/list",
+    response_model=List[PortfolioListItem],
+    include_in_schema=False,
+)
+def list_portfolios(db: Session = Depends(get_db)):
+    portfolios = get_all_portfolios(db)
+    return [
+        PortfolioListItem(
+            id=str(p.id),
+            name=p.name,
+            base_currency=p.base_currency,
+            benchmark_symbol=p.benchmark_symbol,
+        )
+        for p in portfolios
+    ]
+
 
 @router.get(
     "/{portfolio_id}/overview",
@@ -347,10 +374,48 @@ def get_allocation(
                 )
             )
 
+    conc_data = calculate_concentration_metrics(alloc_df)
+    conc_obj = ConcentrationItem(
+        hhi=conc_data.hhi,
+        largest_holding_ticker=conc_data.largest_holding_ticker,
+        largest_holding_weight=conc_data.largest_holding_weight,
+        top_3_weight=conc_data.top_3_weight,
+        top_5_weight=conc_data.top_5_weight,
+        total_holdings_count=conc_data.total_holdings_count,
+    )
+
     return PortfolioAllocationResponse(
         portfolio_id=str(p.id),
         total_market_value=round(total_val, 4),
         allocations=items,
+        concentration=conc_obj,
+    )
+
+
+@router.get(
+    "/{portfolio_id}/concentration",
+    response_model=ConcentrationItem,
+    summary="Concentration Analytics",
+    description="Returns portfolio concentration metrics including HHI, top 3 and top 5 weights.",
+)
+def get_concentration(
+    portfolio_id: str,
+    db: Session = Depends(get_db),
+):
+    p_uuid = _parse_uuid(portfolio_id)
+    _get_portfolio_or_404(db, p_uuid)
+
+    holdings_df, _ = _build_holdings_dataframe(db, p_uuid)
+    alloc_df = calculate_asset_allocation(holdings_df)
+    conc_data = calculate_concentration_metrics(alloc_df)
+
+    return ConcentrationItem(
+        hhi=conc_data.hhi,
+        largest_holding_ticker=conc_data.largest_holding_ticker,
+        largest_holding_weight=conc_data.largest_holding_weight,
+        top_3_weight=conc_data.top_3_weight,
+        top_5_weight=conc_data.top_5_weight,
+        total_holdings_count=conc_data.total_holdings_count,
     )
 
 

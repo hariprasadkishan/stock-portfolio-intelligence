@@ -31,6 +31,19 @@ class AllocationItem(BaseModel):
     portfolio_weight: float
 
 
+class ConcentrationItem(BaseModel):
+    """Portfolio concentration metrics (HHI, top weights)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    hhi: float = 0.0
+    largest_holding_ticker: Optional[str] = None
+    largest_holding_weight: float = 0.0
+    top_3_weight: float = 0.0
+    top_5_weight: float = 0.0
+    total_holdings_count: int = 0
+
+
 class PortfolioAllocationResponse(BaseModel):
     """Asset allocation breakdown."""
 
@@ -39,6 +52,7 @@ class PortfolioAllocationResponse(BaseModel):
     portfolio_id: str
     total_market_value: float
     allocations: List[AllocationItem] = Field(default_factory=list)
+    concentration: Optional[ConcentrationItem] = None
 
 
 class SectorItem(BaseModel):
@@ -195,3 +209,15 @@ class DashboardSummaryResponse(BaseModel):
     correlation: PortfolioCorrelationResponse
     benchmark: PortfolioBenchmarkResponse
     performance: List[PerformanceObservation] = Field(default_factory=list)
+
+
+class PortfolioListItem(BaseModel):
+    """Portfolio summary item for portfolio switcher dropdowns."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    name: str
+    base_currency: str = "USD"
+    benchmark_symbol: Optional[str] = None
+
