@@ -32,5 +32,7 @@ yarn-error.log*
 
 # Operating system files
 .DS_Store
-Thumbs.dbfrontend/tsconfig.tsbuildinfo
+Thumbs.db
 frontend/tsconfig.tsbuildinfo
+*.tsbuildinfo
+*.log
