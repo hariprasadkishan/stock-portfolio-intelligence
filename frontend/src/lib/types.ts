@@ -145,3 +145,15 @@ export interface PortfolioListItem {
   base_currency: string;
   benchmark_symbol: string | null;
 }
+
+export interface AnalystQuestion {
+  question: string;
+}
+
+export interface AnalystResponse {
+  question: string;
+  answer: string;
+  portfolio_id: string;
+  metrics_used: string[];
+  warnings: string[];
+}

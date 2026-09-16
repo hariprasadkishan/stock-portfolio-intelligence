@@ -4,6 +4,7 @@
  */
 
 import {
+  AnalystResponse,
   DashboardSummary,
   PortfolioAllocation,
   PortfolioBenchmark,
@@ -148,4 +149,21 @@ export async function fetchPerformance(portfolioId: string): Promise<PortfolioPe
     cache: "no-store",
   });
   return handleResponse<PortfolioPerformance>(res);
+}
+
+export async function askPortfolioAnalyst(
+  portfolioId: string,
+  question: string
+): Promise<AnalystResponse> {
+  const url = `${API_BASE}/api/portfolio/${encodeURIComponent(portfolioId)}/ask`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    cache: "no-store",
+    body: JSON.stringify({ question }),
+  });
+  return handleResponse<AnalystResponse>(res);
 }

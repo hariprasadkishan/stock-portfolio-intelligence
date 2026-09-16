@@ -23,6 +23,7 @@ import { BenchmarkComparison } from "@/components/dashboard/BenchmarkComparison"
 import { LoadingSkeleton } from "@/components/dashboard/LoadingSkeleton";
 import { ErrorState } from "@/components/dashboard/ErrorState";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import { AIAnalyst } from "@/components/dashboard/AIAnalyst";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -217,6 +218,12 @@ function DashboardContent() {
             <BenchmarkComparison benchmark={benchmark} />
           </>
         )}
+
+        {/* 10. AI Financial Analyst Experience */}
+        <AIAnalyst
+          portfolioId={overview.portfolio_id}
+          portfolioName={overview.portfolio_name}
+        />
 
         {/* Footer info note */}
         <footer className="pt-6 border-t border-[#1F2937] text-center text-xs text-slate-500 font-mono">
