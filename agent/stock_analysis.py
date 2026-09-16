@@ -28,7 +28,11 @@ import numpy as np
 import pandas as pd  
 
 # Import custom prompts for the AI models
-from prompts import system_prompt, insights_prompt
+try:
+    from prompts import system_prompt, insights_prompt
+except ImportError:
+    from agent.prompts import system_prompt, insights_prompt
+
 
 # Load environment variables (like API keys) from .env file
 load_dotenv()

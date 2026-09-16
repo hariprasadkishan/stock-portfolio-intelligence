@@ -55,6 +55,7 @@ from agent.api.repository import (
     get_portfolio,
     get_portfolio_holdings,
 )
+from agent.ai_analyst.schemas import AnalystQuestion, AnalystResponse
 from agent.api.schemas import (
     AllocationItem,
     ConcentrationItem,
@@ -749,3 +750,21 @@ def get_dashboard(
         benchmark=benchmark_resp,
         performance=performance_resp.performance,
     )
+
+
+@router.post(
+    "/{portfolio_id}/ask",
+    response_model=AnalystResponse,
+    summary="Ask AI Financial Analyst",
+    description="Analyzes portfolio metrics against a natural-language inquiry with strictly grounded deterministic evidence.",
+)
+def ask_financial_analyst(
+    portfolio_id: str,
+    payload: AnalystQuestion,
+    db: Session = Depends(get_db),
+):
+    from agent.ai_analyst.service import FinancialAnalystService
+
+    service = FinancialAnalystService()
+    return service.ask(portfolio_id=portfolio_id, question=payload.question, session=db)
+
